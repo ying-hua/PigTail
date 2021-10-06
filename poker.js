@@ -13,4 +13,8 @@ export default class Poker extends Sprite{
     this.canBeTouched = false
     this.id = pokerId
   }
+  /**
+   * 判断手指在不在扑克牌上
+   */
+  checkIsFingerOnPoker(x,y){}
 }
