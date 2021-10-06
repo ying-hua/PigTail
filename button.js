@@ -1,7 +1,10 @@
+/**
+ * 未完成
+ */
 import Sprite from "./Sprite";
 
 export default class Button extends Sprite{
-  constructor(func,argv){
+  constructor(x,y,func,argv){  //为了方便缩放，x,y为按钮中心点
     super()
     this.touched = false
     this.banned = false
@@ -18,4 +21,11 @@ export default class Button extends Sprite{
   execEvent(){
     this.event(this.eventArgv)
   }
+  renderButton(){
+
+  }
+  /**
+   * 判断手指在不在按钮上
+   */
+  checkIsFingerOnButton(x,y){}
 }
