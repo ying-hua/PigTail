@@ -1,14 +1,17 @@
+/**
+ * 未完成
+ * 背景图片
+ */
+import Button from "./button"
 import Main from "./main"
 import Player from "./player"
 import Sprite from "./Sprite"
+const main = new Main()
 
 export default class Interface{
   constructor(){
     this.name = 0
     this.buttons = []
-    this.main = null
-    this.players = null
-    this.aniId = 0
     this.init()
   }
   /**
@@ -17,10 +20,10 @@ export default class Interface{
    * @param {Main} objMain 
    * @param {Player} objPlayers 
    */
-  init(intName = 0,objMain,objPlayers){
+  init(intName,objPlayers){
     if(this.name == 0 ){
       this.background = new Sprite()
-      this.buttons[0] = null
+      this.buttons[0] = new Button(0,10,10,main.initInterface.bind(main),intName)
       this.buttons[1] = null
     }
     else{}
@@ -28,5 +31,10 @@ export default class Interface{
   /**
    * 渲染界面
    */
-  renderInterface(){}
+  render(ctx){
+    this.background.drawToCanvas(ctx)
+    this.buttons.forEach((btn) => {
+      btn.drawToCanvas(ctx)
+    })
+  }
 }
