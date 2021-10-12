@@ -1,3 +1,7 @@
+/**
+ * 已完成
+ */
+
 import CardStack from "./cardstack"
 
 let instance
@@ -9,6 +13,7 @@ export default class DataBus {
   }
   //重置数据
   reset(){
+    this.gameStarted = true
     this.gameOver = false
     this.gamePaused = false
     this.whoTurn = 0
