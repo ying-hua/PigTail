@@ -1,11 +1,15 @@
 /**
  * 已完成
  */
+import API from "./api"
 import DataBus from "./databus"
 import Player from "./player"
 const databus = new DataBus()
-const PLAY_WHEN_SAFE = 0.2
+const api = new API()
+const PLAY_WHEN_SAFE = 0
 const BRAVERY = 0.8
+//花色id映射
+const PATTERN_ID = {'S':0,'H':1,'C':2,'D':3}
 let instance
 export default class AI{
   constructor(){
@@ -18,7 +22,7 @@ export default class AI{
    * 再计算风险值
    * 通过风险值来决定出牌和翻牌的概率
    */
-  autoPlay(self,oppo){
+  autoPlay(self,oppo,main){
     //自己的卡牌数量
     let selfCount = 0
     self.handCards.forEach((cards) => {
@@ -35,7 +39,13 @@ export default class AI{
     let groupCount = 52 - (selfCount + oppoCount + playCount)
     //必胜局面只翻牌
     if(oppoCount >= 2*groupCount + playCount + selfCount -1){
-      self.uncover()
+      if(databus.mode == 2){
+        databus.requesting = true
+        api.executeOp(main,main.token,main.uuid,0)
+      }
+      else{
+        self.uncover()
+      }
     }
     //一般局面
     else{
@@ -43,25 +53,37 @@ export default class AI{
       //局面安全
       if(risk < BRAVERY){
         if(Math.random() <= PLAY_WHEN_SAFE){
-          this.playCardSafely(self)
+          this.playCardSafely(self,main)
         }
         else{
-          self.uncover()
+          if(databus.mode == 2){
+            databus.requesting = true
+            api.executeOp(main,main.token,main.uuid,0)
+          }
+          else{
+            self.uncover()
+          }
         }
       }
       //局面危险
       else if(risk >= 1){
-        this.playCardSafely(self)
+        this.playCardSafely(self,main)
       }
       //既不安全也不危险
       else{
         if(BRAVERY == 1) return
         let possibilityOfPlay = PLAY_WHEN_SAFE + (risk - BRAVERY)*(1 - PLAY_WHEN_SAFE)/(1 - BRAVERY)
         if(Math.random() <= possibilityOfPlay){
-          this.playCardSafely(self)
+          this.playCardSafely(self,main)
         }
         else{
-          self.uncover()
+          if(databus.mode == 2){
+            databus.requesting = true
+            api.executeOp(main,main.token,main.uuid,0)
+          }
+          else{
+            self.uncover()
+          }
         }
       }
     }
@@ -71,18 +93,37 @@ export default class AI{
    * 否则翻牌
    * @param {Player} self self:玩家
    */
-  playCardSafely(self){
+  playCardSafely(self,main){
     let topId = ""
     if(databus.playZone.count >= 1){
       topId = databus.playZone.strCards[0][0]
     }
     //如果有牌可出就出花色最多的牌
     if(this.canPlay(self,topId)){
-      self.playCard(this.maxPattern(self,topId))
+      if(databus.mode == 2){
+        databus.requesting = true
+        api.executeOp(
+          main,
+          main.token,
+          main.uuid,
+          1,
+          self.handCards[PATTERN_ID[this.maxPattern(self,topId)]].strCards[0]
+        )
+        console.log(PATTERN_ID[this.maxPattern(self,topId)])
+      }
+      else{
+        self.playCard(this.maxPattern(self,topId))
+      }
     }
     //无牌可出就翻牌
     else{
-      self.uncover()
+      if(databus.mode == 2){
+        databus.requesting = true
+        api.executeOp(main,main.token,main.uuid,0)
+      }
+      else{
+        self.uncover()
+      }
     }
   }
   /**

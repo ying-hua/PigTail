@@ -2,29 +2,54 @@
  * 未完成
  * 卡堆位置
  * 主副玩家
+ * 通过yourTurn渲染玩家
  */
 import DataBus from "./databus"
 import Sprite from "./sprite"
 import CardStack from "./cardstack"
+import API from "./api"
+import Poker from "./poker"
 const databus = new DataBus()
+const api = new API()
+const screenWidth = window.innerWidth
+const screenHeight = window.innerHeight
 export default class Player {
-  constructor(plaName,primary){
-    this.name = plaName
+  //flag为0表示玩家1，为1表示玩家2
+  constructor(flag){
+    this.flag = flag
+    this.name = databus.playerNames[flag]
     this.profilePic = new Sprite()
     this.byAI = false
-    this.yourTurn = false
-    this.pokers = []
     this.pokerIcons = new Sprite()
-    this.spades = new CardStack(0,0,0)
-    this.hearts = new CardStack(0,0,0)
-    this.clubs = new CardStack(0,0,0)
-    this.diamonds = new CardStack(0,0,0)
+    //玩家手牌数组,0,1,2,3分别为黑桃，红心，梅花，方块
+    this.handCards = []
+    //whl  玩家手牌位置
+    //玩家1手牌
+    if(!flag){
+      this.handCards[0] = new CardStack(flag,screenWidth*170/780,screenHeight*240/360)
+      this.handCards[1] = new CardStack(flag,screenWidth*290/780,screenHeight*240/360)
+      this.handCards[2] = new CardStack(flag,screenWidth*410/780,screenHeight*240/360)
+      this.handCards[3] = new CardStack(flag,screenWidth*530/780,screenHeight*240/360)
+    }
+    //玩具2手牌
+    else{
+      this.handCards[0] = new CardStack(flag,screenWidth*170/780,screenHeight*20/360)
+      this.handCards[1] = new CardStack(flag,screenWidth*290/780,screenHeight*20/360)
+      this.handCards[2] = new CardStack(flag,screenWidth*410/780,screenHeight*20/360)
+      this.handCards[3] = new CardStack(flag,screenWidth*530/780,screenHeight*20/360)
+    }
+
   }
   /**
    * 翻开卡组顶部的牌，并进行同花色判断，若相同就吃牌
    */
-  uncover(){
+  uncover(pokerId){
+    if(databus.cardGroup.count == 0) return
     let top = databus.cardGroup.shiftCard()
+    if(databus.mode == 2){
+      top = new Poker(pokerId,0,0,0)
+    }
+    top.hide = 0
     if(this.compare(top)){
       this.eat(top)
       databus.playZone.cards.forEach((poker) =>{
@@ -43,16 +68,16 @@ export default class Player {
   playCard(id){
     let top
     if(id == 'S'){
-      top = this.spades.shiftCard()
+      top = this.handCards[0].shiftCard()
     }
     else if(id == 'H'){
-      top = this.hearts.shiftCard()
+      top = this.handCards[1].shiftCard()
     }
     else if(id == 'C'){
-      top = this.clubs.shiftCard()
+      top = this.handCards[2].shiftCard()
     }
     else if(id == 'D'){
-      top = this.diamonds.shiftCard()
+      top = this.handCards[3].shiftCard()
     }
     if(!top) return
     if(this.compare(top)){
@@ -86,16 +111,16 @@ export default class Player {
     let poker = pk
     let pattern = poker.id[0]
     if(pattern == 'S'){
-      this.spades.addACard(poker)
+      this.handCards[0].addACard(poker)
     }
     else if(pattern == 'H'){
-      this.hearts.addACard(poker)
+      this.handCards[1].addACard(poker)
     }
     else if(pattern == 'C'){
-      this.clubs.addACard(poker)
+      this.handCards[2].addACard(poker)
     }
     else if(pattern == 'D'){
-      this.diamonds.addACard(poker)
+      this.handCards[3].addACard(poker)
     }
   }
 }

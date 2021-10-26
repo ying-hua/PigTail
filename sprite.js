@@ -1,5 +1,6 @@
 /**
  * 游戏基础的精灵类
+ * 已完成
  */
 export default class Sprite {
   constructor(imgSrc = '', width = 0, height = 0, x = 0, y = 0) {
@@ -8,10 +9,8 @@ export default class Sprite {
 
     this.width = width
     this.height = height
-
     this.x = x
     this.y = y
-
     this.visible = true
   }
 
@@ -38,12 +37,12 @@ export default class Sprite {
   isCollideWith(sp) {
     const spX = sp.x + sp.width / 2
     const spY = sp.y + sp.height / 2
-
+    const deviation = 30
     if (!this.visible || !sp.visible) return false
 
-    return !!(spX >= this.x
-              && spX <= this.x + this.width
-              && spY >= this.y
-              && spY <= this.y + this.height)
+    return !!(spX >= this.x - deviation
+              && spX <= this.x + this.width +deviation
+              && spY >= this.y - deviation
+              && spY <= this.y + this.height + deviation)
   }
 }
