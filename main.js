@@ -31,10 +31,10 @@ export default class Main{
    */
   initMain(){
     this.players=[]
-    this.studentId = "031902207"
-    this.password = "hxc241518"
+    this.studentId = ""
+    this.password = ""
     this.token = ""
-    this.uuid = "anuashHsn9as"
+    this.uuid = ""
     this.apiRes = null
     this.curInterface = new Interface()
     this.bindLoop = this.loop.bind(this)
