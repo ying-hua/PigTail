@@ -7,7 +7,7 @@ import Player from "./player"
 const databus = new DataBus()
 const api = new API()
 const PLAY_WHEN_SAFE = 0
-const BRAVERY = 0.8
+const BRAVERY = 1.2
 //花色id映射
 const PATTERN_ID = {'S':0,'H':1,'C':2,'D':3}
 let instance
@@ -109,7 +109,6 @@ export default class AI{
           1,
           self.handCards[PATTERN_ID[this.maxPattern(self,topId)]].strCards[0]
         )
-        console.log(PATTERN_ID[this.maxPattern(self,topId)])
       }
       else{
         self.playCard(this.maxPattern(self,topId))

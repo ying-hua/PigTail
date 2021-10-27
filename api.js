@@ -8,7 +8,6 @@ export default class API{
     instance = this
   }
 login(main){
-    let result
     wx.request({
       url: 'http://172.17.173.97:8080/api/user/login',
       data:{
@@ -42,6 +41,7 @@ login(main){
       success (res) {
         console.log(res.data.data.uuid)
         main.uuid = res.data.data.uuid
+        main.apiRes = null
           if(res.data.code == "200")
             main.initInterface.bind(main)(6,main)
           else
@@ -59,13 +59,10 @@ login(main){
         'Authorization': token
       },
       success (res) {
-        main.apiRes = res
         if(res.data.code == "200"){
           main.initInterface.bind(main)(1,main)
           main.initGame.bind(main)()
           databus.mode = 2
-          databus.whoTurn = 1
-          databus.host = '0'
           main.curInterface.buttons[1].visible = false
           main.curInterface.buttons[2].visible = false
           main.curInterface.buttons[3].visible = false
@@ -102,7 +99,6 @@ login(main){
         "card":pokerId
       },
       success (res) {
-        console.log(res)
         let lastOp = res.data.data.last_code.split(' ')
         if(lastOp[1] == '0'){
           main.players[0].uncover(lastOp[2])

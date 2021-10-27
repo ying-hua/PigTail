@@ -62,6 +62,7 @@ export default class Interface{
           databus.mode = 0
           main.initInterface.bind(main)(intName,main)
           main.initGame.bind(main)()
+          databus.whoTurn = false
           main.curInterface.buttons[1].visible = false
           main.curInterface.buttons[2].visible = false
           main.curInterface.buttons[3].visible = false
@@ -76,6 +77,7 @@ export default class Interface{
           databus.mode = 1
           main.initInterface.bind(main)(intName,main)
           main.initGame.bind(main)()
+          databus.whoTurn = false
           main.curInterface.buttons[1].visible = false
           main.curInterface.buttons[3].visible = false
         },

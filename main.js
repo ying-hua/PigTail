@@ -92,12 +92,11 @@ export default class Main{
       //console.log(this.apiRes.data.code)
       databus.requesting = false
       //等待玩家成功 ，加入游戏
-      if(this.apiRes.data.code == "200"
-        && this.apiRes.data.data.last_code == ''){
+      if(this.apiRes.data.code == "200"){
         this.initInterface.bind(this)(1,this)
         this.initGame.bind(this)()
         databus.mode = 2
-        databus.host = '1'
+        databus.whoTurn = !this.apiRes.data.data.your_turn
         this.curInterface.buttons[1].visible = false
         this.curInterface.buttons[2].visible = false
         this.curInterface.buttons[3].visible = false
@@ -107,6 +106,7 @@ export default class Main{
     else{
       databus.requesting = true
       api.getLastOp(this.token,this.uuid,this)
+      
     }
   }
   /**
@@ -114,14 +114,29 @@ export default class Main{
    */
   getPlayerOp(){
     if(this.curInterface.name != 1) return
+    if(databus.whoTurn == false) return
     if(databus.requesting) return
-    if(databus.whoTurn == 0) return
     if(!!this.apiRes){
-      //console.log(this.apiRes.data.code)
-      //对手出了牌
-      if(!!this.apiRes.data.data.last_code
-        && this.apiRes.data.data.last_code[0] == databus.host){
-        databus.whoTurn = 0
+      if(databus.whoTurn == undefined
+        && this.apiRes.data.data.your_turn != undefined){
+        databus.whoTurn = !this.apiRes.data.data.your_turn
+      }
+      else if(!databus.whoTurn){
+        this.apiRes = null
+        return
+      }
+      console.log('get')
+      console.log(databus.whoTurn)
+      console.log(this.apiRes.data)
+      //判断对手是否出牌
+      //错误判断
+      if(this.apiRes.data.code != '200'){
+        console.log('发生错误')
+        console.log(this.apiRes)
+      }
+      else if(!!this.apiRes.data.data.last_code
+        && this.apiRes.data.data.your_turn
+        && databus.whoTurn){
         //对手出牌
         let lastOp = this.apiRes.data.data.last_code.split(" ")
         if(lastOp[1] == '0'){
@@ -130,6 +145,7 @@ export default class Main{
         else if(lastOp[1] == '1'){
           this.players[1].playCard(lastOp[2][0])
         }
+        databus.whoTurn = false
       }
       this.apiRes = null
     }
@@ -150,21 +166,15 @@ export default class Main{
       this.initInterface(3,this)
     }
     //AI自动出牌
-    if(databus.whoTurn == 0){
+    if(!databus.whoTurn){
       if(this.players[0].byAI){
-        if(databus.whoTurn == 1)
-          databus.whoTurn = 0
-        else 
-          databus.whoTurn = 1
+        databus.whoTurn = !databus.whoTurn
         this.ai.autoPlay(this.players[0],this.players[1],this)
       }
     }
     else{
       if(this.players[1].byAI){
-        if(databus.whoTurn == 1)
-          databus.whoTurn = 0
-        else 
-          databus.whoTurn = 1
+        databus.whoTurn = !databus.whoTurn
         this.ai.autoPlay(this.players[1],this.players[0],this)
       }
     }
@@ -420,7 +430,7 @@ export default class Main{
     //如果游戏进行中则监听卡牌，卡牌可见且被触摸时touched为1，并使手指位于卡牌中心
     if(this.curInterface.name != 1) return
     //监听卡组第一张牌
-    if(databus.whoTurn == 0 || databus.mode != 2){
+    if(!databus.whoTurn || databus.mode != 2){
       if(databus.cardGroup.count
         && databus.cardGroup.cards[0].visible
         && databus.cardGroup.cards[0].checkIsFingerOnPoker(x,y)){
@@ -430,7 +440,7 @@ export default class Main{
       }
     }
     //根据whoTurn监听两玩家四种花色手牌第一张
-    if(databus.whoTurn == 0){
+    if(!databus.whoTurn){
       for(let i = 0; i < 4; i++){
         if(this.players[0].handCards[i].count
           && this.players[0].handCards[i].cards[0].visible
@@ -481,7 +491,7 @@ export default class Main{
       databus.cardGroup.cards[0].setPokerPosAcrossFingerPosZ(x,y)
     }
     //监听玩家手牌
-    if(databus.whoTurn == 0){
+    if(!databus.whoTurn){
       for(let i = 0; i < 4; i++){
         if(!this.players[0].handCards[i].count
           || !this.players[0].handCards[i].cards[0].touched) continue
@@ -518,7 +528,7 @@ export default class Main{
       databus.cardGroup.cards[0].touched = false
       //碰到放置区
       if(databus.cardGroup.cards[0].isCollideWith(databus.playZone)){
-        if(databus.whoTurn == 0){
+        if(!databus.whoTurn){
           //在线模式发送请求
           if(databus.mode == 2){
             databus.requesting = true
@@ -532,10 +542,7 @@ export default class Main{
         else{
           this.players[1].uncover()
         }
-        if(databus.whoTurn == 1)
-          databus.whoTurn = 0
-        else 
-          databus.whoTurn = 1
+        databus.whoTurn = !databus.whoTurn
       }
       //没碰到放置区，卡牌归位
       else{
@@ -546,7 +553,7 @@ export default class Main{
     }
     //监听玩家手牌，若卡牌碰到放置区，则根据whoTurn使玩家执行出牌操作
     //i的值表示出的花色，用PATTERN数组转换成字符串
-    if(databus.whoTurn == 0){
+    if(!databus.whoTurn){
       for(let i = 0; i < 4; i++){
         if(!this.players[0].handCards[i].count
           || !this.players[0].handCards[i].cards[0].touched) continue
@@ -567,10 +574,7 @@ export default class Main{
           else{
             this.players[0].playCard(PATTERNS[i])
           }
-          if(databus.whoTurn == 1)
-            databus.whoTurn = 0
-          else 
-            databus.whoTurn = 1
+          databus.whoTurn = !databus.whoTurn
         }
         //没碰到放置区，卡牌归位
         else{
@@ -586,10 +590,7 @@ export default class Main{
         this.players[1].handCards[i].cards[0].touched = false
         if(this.players[1].handCards[i].cards[0].isCollideWith(databus.playZone)){
           this.players[1].playCard(PATTERNS[i])
-          if(databus.whoTurn == 1)
-          databus.whoTurn = 0
-        else 
-          databus.whoTurn = 1
+          databus.whoTurn = !databus.whoTurn
         }
         else{
           this.players[1].handCards[i].cards[0].x = this.players[1].handCards[i].fiX

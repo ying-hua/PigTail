@@ -16,13 +16,12 @@ export default class DataBus {
   reset(){
     //游戏模式 1单机 2双人 3在线
     this.mode
-    //是否为主办方
-    this.host = ''
     this.requesting = false
     this.gameStarted = true
     this.gameOver = false
     this.gamePaused = false
-    this.whoTurn = 0
+    //轮到谁,false为1p
+    this.whoTurn = undefined
     this.playerNames = ["player1","player2"]
     //whl  卡组、放置区位置
     this.cardGroup = new CardStack(0,screenWidth/4-12,screenHeight/2-39)
